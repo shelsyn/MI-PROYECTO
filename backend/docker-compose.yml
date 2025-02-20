@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - micro_net
+
+  usuarios_service:
+    build:
+      context: ./usuarios
+    container_name: usuarios_service
+    env_file:
+      - .env
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+    networks:
+      - micro_net
+
+  publicaciones_service:
+    build:
+      context: ./publicaciones
+    container_name: publicaciones_service
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - micro_net
+
+volumes:
+  postgres_data:
+
+networks:
+  micro_net:
+    driver: bridge
